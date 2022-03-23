@@ -38,5 +38,104 @@ mdl_30_to_45
 
 ## Predicting multiple models ##
 
+# Create a tibble of explanatory data, setting no. of conv stores to 0 to 10
+explanatory_data <- tibble(
+    n_convenience = seq(0, 10)
+    
+)
+
+# From previous step
+explanatory_data <- tibble(
+  n_convenience = 0:10
+)
+
+# Add column of predictions using "0 to 15" model and explanatory data 
+prediction_data_0_to_15 <- explanatory_data %>% 
+mutate(
+  price_twd_msq = predict(mdl_0_to_15, explanatory_data),
+)
+  
+
+# Same again, with "15 to 30"
+prediction_data_15_to_30 <- explanatory_data %>% 
+  mutate(
+  price_twd_msq = predict(mdl_15_to_30, explanatory_data),
+)
+
+# Same again, with "30 to 45"
+prediction_data_30_to_45 <- explanatory_data %>% 
+  mutate(
+  price_twd_msq = predict(mdl_30_to_45, explanatory_data)
+)
+
+## Visualizing multiple models ##
+
+# Using taiwan_real_estate, plot price vs. no. of conv. stores colored by house age
+ggplot(taiwan_real_estate, 
+aes(n_convenience, price_twd_msq, color = house_age_years)) +
+  # Make it a scatter plot
+  geom_point() +
+  # Add smooth linear regression trend lines, no ribbon
+  geom_smooth(method = "lm", se = FALSE)
+  
+# Extend the plot to include prediction points
+ggplot(taiwan_real_estate, aes(n_convenience, price_twd_msq, color = house_age_years)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  # Add points using prediction_data_0_to_15, colored red, size 3, shape 15
+  geom_point(data = prediction_data_0_to_15, color = "red", size = 3, shape = 15) +
+  # Add points using prediction_data_15_to_30, colored green, size 3, shape 15
+  geom_point (data = prediction_data_15_to_30, color = "green", size = 3, shape = 15)+
+  # Add points using prediction_data_30_to_45, colored blue, size 3, shape 15
+  geom_point( data = prediction_data_30_to_45, color = "blue", size = 3, shape = 15)  
+  
+## Assessing model performance  ##
+
+# Get the coeff. of determination for mdl_all_ages
+mdl_all_ages %>%
+glance() %>%
+pull(r.squared)
+
+# Get the coeff. of determination for mdl_0_to_15
+mdl_0_to_15 %>%
+glance() %>%
+pull(r.squared)
+
+# Get the coeff. of determination for mdl_15_to_30
+mdl_15_to_30 %>%
+glance() %>%
+pull(r.squared)
+
+# Get the coeff. of determination for mdl_30_to_45
+mdl_30_to_45 %>%
+glance() %>%
+pull(r.squared)
+
+# Get the RSE for mdl_all
+mdl_all_ages %>%
+glance() %>%
+pull(sigma)
+
+# Get the RSE for mdl_0_to_15
+mdl_0_to_15 %>%
+glance() %>%
+pull(sigma)
+
+# Get the RSE for mdl_15_to_30
+mdl_15_to_30 %>%
+glance() %>%
+pull(sigma)
+
+# Get the RSE for mdl_30_to_45
+mdl_30_to_45 %>%
+glance() %>%
+pull(sigma)
+
+## Specifying an interaction ##
+
+
+
+
+
 
 
