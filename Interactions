@@ -133,8 +133,157 @@ pull(sigma)
 
 ## Specifying an interaction ##
 
+# Model price vs both with an interaction using "times" syntax
+lm(price_twd_msq ~ n_convenience * house_age_years, data = taiwan_real_estate)
+
+# Model price vs both with an interaction using "colon" syntax
+lm(formula = price_twd_msq ~ n_convenience + house_age_years + n_convenience:house_age_years, 
+    data = taiwan_real_estate)
+
+## Interactions with understandable coeffs ##
+
+# Model price vs. house age plus an interaction, no intercept
+mdl_readable_inter <- lm(price_twd_msq ~ house_age_years + house_age_years:n_convenience +0, data = taiwan_real_estate)
+
+# See the result
+mdl_readable_inter
+
+# Get coefficients for mdl_0_to_15
+coefficients(mdl_0_to_15)
+
+# Get coefficients for mdl_15_to_30
+coefficients(mdl_15_to_30)
+
+# Get coefficients for mdl_30_to_45
+coefficients(mdl_30_to_45)
 
 
+## Predicting with interactions ##
+
+# Make a grid of explanatory data
+explanatory_data <- expand_grid(
+  # Set n_convenience to zero to ten
+  n_convenience = seq(0, 10),
+  # Set house_age_years to the unique values of that variable
+  house_age_years = unique(taiwan_real_estate$house_age_years)
+)
+
+# See the result
+explanatory_data
+
+# From previous step
+explanatory_data <- expand_grid(
+  n_convenience = 0:10,
+  house_age_years = unique(taiwan_real_estate$house_age_years)
+)
+
+# Add predictions to the data frame
+prediction_data <- explanatory_data %>% 
+mutate(price_twd_msq = predict(mdl_price_vs_both_inter, explanatory_data) )
+
+# See the result
+prediction_data
+
+# From previous step
+explanatory_data <- expand_grid(
+  n_convenience = 0:10,
+  house_age_years = unique(taiwan_real_estate$house_age_years)
+)
+prediction_data <- explanatory_data %>% 
+  mutate(
+    price_twd_msq = predict(mdl_price_vs_both_inter, explanatory_data)
+  )
+
+# Using taiwan_real_estate, plot price vs. no. of convenience stores, colored by house age
+ggplot(taiwan_real_estate, aes(n_convenience, price_twd_msq, color = house_age_years)) +
+  # Make it a scatter plot
+  geom_point()+
+  # Add linear regression trend lines, no ribbon
+  geom_smooth(method = "lm", se = FALSE)+
+  # Add points from prediction_data, size 5, shape 15
+  geom_point(data = prediction_data, size = 5, shape =  15)
+  
+## Manually calculating predictions with interactions ## 
+
+# Get the coefficients from mdl_price_vs_both_inter
+coeffs <- coefficients(mdl_price_vs_both_inter)
+
+# Get the intercept for 0 to 15 year age group
+intercept_0_15 <- coeffs[1]
+
+# Get the intercept for 15 to 30 year age group
+intercept_15_30 <- coeffs[2]
+
+# Get the intercept for 30 to 45 year age group
+intercept_30_45 <- coeffs[3]
+
+# Get the slope for 0 to 15 year age group
+slope_0_15 <- coeffs[4]
+
+# Get the slope for 15 to 30 year age group
+slope_15_30 <- coeffs[5]
+
+# Get the slope for 30 to 45 year age group
+slope_30_45 <- coeffs[6]
+
+# From previous step
+coeffs <- coefficients(mdl_price_vs_both_inter)
+intercept_0_15 <- coeffs[1]
+intercept_15_30 <- coeffs[2]
+intercept_30_45 <- coeffs[3]
+slope_0_15 <- coeffs[4]
+slope_15_30 <- coeffs[5]
+slope_30_45 <- coeffs[6]
+
+prediction_data <- explanatory_data %>% 
+  mutate(
+    # Consider the 3 cases to choose the price
+    price_twd_msq = case_when(
+    house_age_years == "0 to 15" ~ intercept_0_15 + slope_0_15 * n_convenience,
+    house_age_years == "15 to 30" ~ intercept_15_30 + slope_15_30 * n_convenience,
+    house_age_years == "30 to 45" ~ intercept_30_45 + slope_30_45 * n_convenience
+
+    )    
+  )
+
+# See the result
+prediction_data
+
+
+## Modeling eBay auctions ## 
+
+
+# Take a glimpse at the dataset
+glimpse(auctions)
+
+# Model price vs. opening bid using auctions
+mdl_price_vs_openbid <- lm(price ~ openbid, data = auctions)
+coefficients(mdl_price_vs_openbid)
+
+# See the result
+mdl_price_vs_openbid
+
+# Using auctions, plot price vs. opening bid as a scatter plot with linear regression trend lines
+ggplot(auctions, aes(openbid, price))+
+geom_point()+ 
+geom_smooth(method = "lm", se = FALSE)
+
+## Modeling each auction type ## 
+
+# Fit linear regression of price vs. opening bid and auction type, with an interaction.
+mdl_price_vs_both <- lm(price ~ openbid + auction_type + openbid:auction_type, data = auctions)
+coefficients(mdl_price_vs_both)
+
+# See the result
+mdl_price_vs_both
+
+# Using auctions, plot price vs. opening bid colored by auction type as a scatter plot with linear regr'n trend lines
+ggplot(auctions, aes(openbid, price, color = auction_type))+
+geom_point()+ 
+geom_smooth(method = "lm", se = FALSE)
+
+
+  
 
 
 
