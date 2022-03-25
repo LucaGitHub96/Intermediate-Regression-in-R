@@ -101,7 +101,45 @@ ggplot(
  
  ## Visualizing many variables ## 
  
- 
+ # Using taiwan_real_estate, no. of conv. stores vs. sqrt of dist. to MRT, colored by plot house price
+ggplot(taiwan_real_estate, aes( sqrt(dist_to_mrt_m), n_convenience, color = price_twd_msq)) +
+  # Make it a scatter plot
+  geom_point() +
+  # Use the continuous viridis plasma color scale
+  scale_color_viridis_c(option = "plasma") +
+  # Facet, wrapped by house age
+  facet_wrap(vars(house_age_years))
+  
+  # Model price vs. no. of conv. stores, sqrt dist. to MRT station & house age, no global intercept, no interactions
+mdl_price_vs_all_no_inter <- lm(price_twd_msq ~ n_convenience + sqrt(dist_to_mrt_m) + house_age_years + 0, data = taiwan_real_estate)
+
+# See the result
+mdl_price_vs_all_no_inter
+
+# Model price vs. sqrt dist. to MRT station, no. of conv. stores & house age, no global intercept, 3-way interactions
+mdl_price_vs_all_3_way_inter <- lm(price_twd_msq ~ sqrt(dist_to_mrt_m) + n_convenience + house_age_years + sqrt(dist_to_mrt_m):n_convenience + sqrt(dist_to_mrt_m):house_age_years + n_convenience:house_age_years + sqrt(dist_to_mrt_m):n_convenience:house_age_years + 0, data = taiwan_real_estate)
+
+
+# See the result
+mdl_price_vs_all_3_way_inter
+
+# Model price vs. sqrt dist. to MRT station, no. of conv. stores & house age, no global intercept, 2-way interactions
+mdl_price_vs_all_2_way_inter <- # Model price vs. sqrt dist. to MRT station, no. of conv. stores & house age, no global intercept, 3-way interactions
+mdl_price_vs_all_3_way_inter <- lm(price_twd_msq ~ sqrt(dist_to_mrt_m) + n_convenience + house_age_years + sqrt(dist_to_mrt_m):n_convenience + sqrt(dist_to_mrt_m):house_age_years + n_convenience:house_age_years + 0, data = taiwan_real_estate)
+
+
+# See the result
+mdl_price_vs_all_3_way_inter
+
+
+# See the result
+mdl_price_vs_all_2_way_inter
+
+
+## Predicting again ## 
+
+
+
 
   
   
